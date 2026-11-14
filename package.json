@@ -1,0 +1,24 @@
+{
+  "name": "soba",
+  "version": "0.1.0",
+  "description": "Soba — an educational browser model of stove draught failure and carbon monoxide exposure",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "night": "tsx scripts/night.ts",
+    "docs:params": "tsx scripts/params-table.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.0"
+  }
+}
