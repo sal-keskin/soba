@@ -1,6 +1,7 @@
 import { K } from './params';
 import { BASE_CONTROLS } from './presets';
 import { createState, NIGHT_SECONDS, step } from './sim';
+import type { ControlEvent, Scenario } from './night';
 import type { Controls } from './types';
 
 /** One hourly forecast point. Wind values are at 10 m, in m/s. */
@@ -63,6 +64,61 @@ function lerpDir(a: number, b: number, f: number): number {
   return (a + d * f + 360) % 360;
 }
 
+/** Controls of the house at time t (s) of a forecast night. */
+export function controlsAt(
+  hours: ForecastHour[],
+  facingDeg: number | null,
+  forcedDir: 1 | -1,
+  house: Controls,
+  t: number,
+): Controls {
+  const n = hours.length - 1;
+  const x = Math.min(Math.max(t, 0) / 3600, n - 1e-9);
+  const i = Math.floor(x);
+  const f = x - i;
+  const a = hours[i];
+  const b = hours[i + 1];
+  const wind = Math.max(0, lerp(a.wind, b.wind, f));
+  const c: Controls = {
+    ...house,
+    tOut: lerp(a.tOut, b.tOut, f),
+    wind,
+    gust: Math.max(wind, lerp(a.gust, b.gust, f)),
+    windDir: forcedDir,
+    align: 1,
+  };
+  if (facingDeg !== null) {
+    const along = Math.cos(((lerpDir(a.dirDeg, b.dirDeg, f) - facingDeg) * Math.PI) / 180);
+    c.windDir = along >= 0 ? 1 : -1;
+    c.align = Math.abs(along);
+  }
+  return c;
+}
+
+/** A playable scenario that follows the forecast in ten-minute steps. */
+export function forecastScenario(
+  hours: ForecastHour[],
+  facingDeg: number | null,
+  forcedDir: 1 | -1,
+  seed = 1,
+  house: Controls = TONIGHT_HOUSE,
+): Scenario {
+  const pts = hours.slice(0, NIGHT_SECONDS / 3600 + 1);
+  const round = (c: Controls): Partial<Controls> => ({
+    tOut: Math.round(c.tOut * 10) / 10,
+    wind: Math.round(c.wind * 10) / 10,
+    gust: Math.round(c.gust * 10) / 10,
+    windDir: c.windDir,
+    align: Math.round(c.align * 100) / 100,
+  });
+  const events: ControlEvent[] = [];
+  for (let t = 600; t < (pts.length - 1) * 3600; t += 600) {
+    events.push({ t, patch: round(controlsAt(pts, facingDeg, forcedDir, house, t)) });
+  }
+  const first = controlsAt(pts, facingDeg, forcedDir, house, 0);
+  return { seed, controls: { ...first, ...round(first) }, events };
+}
+
 function runOnce(
   hours: ForecastHour[],
   facingDeg: number | null,
@@ -74,28 +130,7 @@ function runOnce(
   const weak = new Array<number>(n).fill(0);
   const spill = new Array<number>(n).fill(0);
   const draught = new Array<number>(n).fill(0);
-  const at = (t: number): Controls => {
-    const x = Math.min(t / 3600, n - 1e-9);
-    const i = Math.floor(x);
-    const f = x - i;
-    const a = hours[i];
-    const b = hours[i + 1];
-    const wind = Math.max(0, lerp(a.wind, b.wind, f));
-    const c: Controls = {
-      ...house,
-      tOut: lerp(a.tOut, b.tOut, f),
-      wind,
-      gust: Math.max(wind, lerp(a.gust, b.gust, f)),
-      windDir: forcedDir,
-      align: 1,
-    };
-    if (facingDeg !== null) {
-      const along = Math.cos(((lerpDir(a.dirDeg, b.dirDeg, f) - facingDeg) * Math.PI) / 180);
-      c.windDir = along >= 0 ? 1 : -1;
-      c.align = Math.abs(along);
-    }
-    return c;
-  };
+  const at = (t: number): Controls => controlsAt(hours, facingDeg, forcedDir, house, t);
   const s = createState(at(0), seed);
   const steps = (n * 3600) / K.dt;
   const perHour = 3600 / K.dt;

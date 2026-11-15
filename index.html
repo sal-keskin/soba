@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0e1420" />
+    <meta name="description" content="Soba: baca çekişi ve karbonmonoksit zehirlenmesini gösteren eğitim amaçlı model. An educational model of stove draught failure and carbon monoxide." />
+    <meta name="referrer" content="no-referrer" />
+    <title>Soba</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230e1420'/%3E%3Crect x='9' y='15' width='14' height='12' rx='2' fill='%23e8a04a'/%3E%3Crect x='14' y='4' width='4' height='11' fill='%239aa7ba'/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand">
+        <h1 data-t="title">Soba</h1>
+        <p data-t="tagline"></p>
+      </div>
+      <nav class="tabs" aria-label="Soba">
+        <button type="button" id="tab-play" aria-pressed="true" data-t="tabPlay"></button>
+        <button type="button" id="tab-tonight" aria-pressed="false" data-t="tabTonight"></button>
+      </nav>
+      <button type="button" id="lang" class="quiet"></button>
+    </header>
+
+    <main>
+      <section id="view-play">
+        <div class="presets" role="group" aria-labelledby="presets-label">
+          <span id="presets-label" class="sr" data-t="presets"></span>
+          <div id="preset-list" class="chips"></div>
+        </div>
+
+        <div class="stage">
+          <canvas id="scene" role="img"></canvas>
+        </div>
+        <p id="status" class="status" role="status" aria-live="off"></p>
+
+        <div class="timeline">
+          <canvas id="timeline" aria-hidden="true"></canvas>
+          <input id="scrub" type="range" min="0" max="28800" step="60" value="0" />
+        </div>
+
+        <div class="transport">
+          <button type="button" id="play" class="primary"></button>
+          <button type="button" id="restart" data-t="restart"></button>
+          <label class="speed"><span data-t="speed"></span>
+            <select id="speed">
+              <option value="0.5">½×</option>
+              <option value="1" selected>1×</option>
+              <option value="2">2×</option>
+              <option value="4">4×</option>
+            </select>
+          </label>
+          <span id="clock" class="clock" aria-hidden="true"></span>
+        </div>
+
+        <section class="people" aria-labelledby="people-h">
+          <h2 id="people-h" data-t="peopleHeading"></h2>
+          <ul id="people"></ul>
+        </section>
+
+        <details class="settings" id="settings">
+          <summary data-t="settings"></summary>
+          <p class="hint" data-t="settingsHint"></p>
+          <div id="controls" class="controls"></div>
+        </details>
+      </section>
+
+      <section id="view-tonight" hidden>
+        <p data-t="tonightIntro"></p>
+        <form id="search-form" class="search" role="search">
+          <label for="q" data-t="searchLabel"></label>
+          <div class="row">
+            <input id="q" type="search" autocomplete="off" enterkeyhint="search" required minlength="2" />
+            <button type="submit" class="primary" data-t="search"></button>
+          </div>
+        </form>
+        <p id="tonight-msg" class="msg" role="status"></p>
+        <ul id="places" class="places"></ul>
+        <div id="tonight-result" hidden>
+          <h2 id="night-title"></h2>
+          <label class="facing"><span data-t="facing"></span>
+            <select id="facing"></select>
+          </label>
+          <p id="risk-summary" class="summary"></p>
+          <h3 data-t="riskHeading"></h3>
+          <div id="risk-chart" class="risk-chart"></div>
+          <p class="hint" data-t="riskLegend"></p>
+          <div class="table-wrap"><table id="risk-table"></table></div>
+          <p id="lodos-note" class="hint" hidden data-t="lodosNote"></p>
+          <button type="button" id="play-tonight" class="primary" data-t="playTonight"></button>
+          <p class="hint" data-t="tonightHouse"></p>
+        </div>
+        <p class="hint" data-t="privacy"></p>
+        <p class="hint"><a href="https://open-meteo.com/" rel="noopener" target="_blank" data-t="attribution"></a></p>
+      </section>
+    </main>
+
+    <footer class="note">
+      <p><strong aria-hidden="true">112</strong> <span data-t="note"></span></p>
+    </footer>
+
+    <dialog id="debrief" aria-labelledby="debrief-title" closedby="any">
+      <h2 id="debrief-title" data-t="debriefTitle"></h2>
+      <div id="debrief-body"></div>
+      <form method="dialog" class="dialog-actions">
+        <button value="close" autofocus data-t="close"></button>
+        <button value="again" class="primary" data-t="again"></button>
+      </form>
+    </dialog>
+
+    <script type="module" src="/src/ui/main.ts"></script>
+  </body>
+</html>

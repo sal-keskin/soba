@@ -142,8 +142,10 @@ export class Night {
   /** Change controls now. Everything recorded after this moment is discarded. */
   set(patch: Partial<Controls>): void {
     const t = this.state.t;
+    // Several changes at the same moment (for example while paused) are merged.
+    const same = this.events.filter((e) => e.t === t).map((e) => e.patch);
     this.events = this.events.filter((e) => e.t < t);
-    this.events.push({ t, patch: { ...patch } });
+    this.events.push({ t, patch: Object.assign({}, ...same, patch) });
     this.nextEvent = this.events.length;
     Object.assign(this.controls, patch);
     this.samples.length = Math.floor(t / SAMPLE_S) + 1;
